@@ -54,10 +54,12 @@ endif()
 
 # ToDo: Add distances_vsx.cc for powerpc64 SIMD acceleration
 if(__PPC64)
-  set(UTILS_SRC src/simd/hook.cc src/simd/distances_ref.cc)
+  set(UTILS_SRC src/simd/hook.cc src/simd/distances_ref.cc src/simd/distances_powerpc.cc)
   add_library(knowhere_utils STATIC ${UTILS_SRC})
   target_link_libraries(knowhere_utils PUBLIC glog::glog)
 endif()
+
+find_package(LAPACK REQUIRED)
 
 if(LINUX)
   set(BLA_VENDOR OpenBLAS)
@@ -69,10 +71,11 @@ endif()
 
 find_package(BLAS REQUIRED)
 
-find_package(LAPACK REQUIRED)
-
 if(__X86_64)
   list(REMOVE_ITEM FAISS_SRCS ${FAISS_AVX2_SRCS})
+
+  knowhere_file_glob(GLOB FAISS_NEON_SRCS thirdparty/faiss/faiss/impl/*neon.cpp)
+  list(REMOVE_ITEM FAISS_SRCS ${FAISS_NEON_SRCS})
 
   add_library(faiss_avx2 OBJECT ${FAISS_AVX2_SRCS})
   target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -msse4.2

@@ -29,6 +29,10 @@
 #include "instruction_set.h"
 #endif
 
+#if defined(__powerpc64__)
+#include "distances_powerpc.h"
+#endif
+
 #include "distances_ref.h"
 #include "knowhere/log.h"
 namespace faiss {
@@ -81,6 +85,70 @@ cpu_support_sse4_2() {
     return (instruction_set_inst.SSE42());
 }
 #endif
+
+static std::mutex patch_bf16_mutex;
+
+void
+enable_patch_for_fp32_bf16() {
+    std::lock_guard<std::mutex> lock(patch_bf16_mutex);
+#if defined(__x86_64__)
+    if (use_avx512 && cpu_support_avx512()) {
+        // Cloud branch
+        fvec_inner_product = fvec_inner_product_avx512_bf16_patch;
+        fvec_L2sqr = fvec_L2sqr_avx512_bf16_patch;
+
+        fvec_inner_product_batch_4 = fvec_inner_product_batch_4_avx512_bf16_patch;
+        fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_avx512_bf16_patch;
+
+    } else if (use_avx2 && cpu_support_avx2()) {
+        fvec_inner_product = fvec_inner_product_avx_bf16_patch;
+        fvec_L2sqr = fvec_L2sqr_avx_bf16_patch;
+
+        fvec_inner_product_batch_4 = fvec_inner_product_batch_4_avx_bf16_patch;
+        fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_avx_bf16_patch;
+
+    } else if (use_sse4_2 && cpu_support_sse4_2()) {
+        // The branch that can't be reached
+    } else {
+        fvec_inner_product = fvec_inner_product_ref_bf16_patch;
+        fvec_L2sqr = fvec_L2sqr_ref_bf16_patch;
+
+        fvec_inner_product_batch_4 = fvec_inner_product_batch_4_ref_bf16_patch;
+        fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_ref_bf16_patch;
+    }
+#endif
+}
+
+void
+disable_patch_for_fp32_bf16() {
+    std::lock_guard<std::mutex> lock(patch_bf16_mutex);
+#if defined(__x86_64__)
+    if (use_avx512 && cpu_support_avx512()) {
+        // Cloud branch
+        fvec_inner_product = fvec_inner_product_avx512;
+        fvec_L2sqr = fvec_L2sqr_avx512;
+
+        fvec_inner_product_batch_4 = fvec_inner_product_batch_4_avx512;
+        fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_avx512;
+
+    } else if (use_avx2 && cpu_support_avx2()) {
+        fvec_inner_product = fvec_inner_product_avx;
+        fvec_L2sqr = fvec_L2sqr_avx;
+
+        fvec_inner_product_batch_4 = fvec_inner_product_batch_4_avx;
+        fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_avx;
+
+    } else if (use_sse4_2 && cpu_support_sse4_2()) {
+        // The branch that can't be reached
+    } else {
+        fvec_inner_product = fvec_inner_product_ref;
+        fvec_L2sqr = fvec_L2sqr_ref;
+
+        fvec_inner_product_batch_4 = fvec_inner_product_batch_4_ref;
+        fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_ref;
+    }
+#endif
+}
 
 void
 fvec_hook(std::string& simd_type) {
@@ -192,19 +260,19 @@ fvec_hook(std::string& simd_type) {
 
 // ToDo MG: include VSX intrinsics via distances_vsx once _ref tests succeed
 #if defined(__powerpc64__)
-    fvec_inner_product = fvec_inner_product_ref;
-    fvec_L2sqr = fvec_L2sqr_ref;
-    fvec_L1 = fvec_L1_ref;
-    fvec_Linf = fvec_Linf_ref;
+    fvec_inner_product = fvec_inner_product_ref_ppc;
+    fvec_L2sqr = fvec_L2sqr_ref_ppc;
+    fvec_L1 = fvec_L1_ref_ppc;
+    fvec_Linf = fvec_Linf_ref_ppc;
 
-    fvec_norm_L2sqr = fvec_norm_L2sqr_ref;
-    fvec_L2sqr_ny = fvec_L2sqr_ny_ref;
-    fvec_inner_products_ny = fvec_inner_products_ny_ref;
-    fvec_madd = fvec_madd_ref;
-    fvec_madd_and_argmin = fvec_madd_and_argmin_ref;
+    fvec_norm_L2sqr = fvec_norm_L2sqr_ref_ppc;
+    fvec_L2sqr_ny = fvec_L2sqr_ny_ref_ppc;
+    fvec_inner_products_ny = fvec_inner_products_ny_ref_ppc;
+    fvec_madd = fvec_madd_ref_ppc;
+    fvec_madd_and_argmin = fvec_madd_and_argmin_ref_ppc;
 
-    ivec_inner_product = ivec_inner_product_ref;
-    ivec_L2sqr = ivec_L2sqr_ref;
+    ivec_inner_product = ivec_inner_product_ref_ppc;
+    ivec_L2sqr = ivec_L2sqr_ref_ppc;
 
     simd_type = "GENERIC";
     support_pq_fast_scan = false;
