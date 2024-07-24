@@ -262,6 +262,7 @@ fvec_hook(std::string& simd_type) {
 #if defined(__powerpc64__)
     fvec_inner_product = fvec_inner_product_ref_ppc;
     fvec_L2sqr = fvec_L2sqr_ref_ppc;
+    fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_ref_ppc;
     fvec_L1 = fvec_L1_ref_ppc;
     fvec_Linf = fvec_Linf_ref_ppc;
 
