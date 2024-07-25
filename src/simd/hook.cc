@@ -262,7 +262,14 @@ fvec_hook(std::string& simd_type) {
 #if defined(__powerpc64__)
     fvec_inner_product = fvec_inner_product_ref_ppc;
     fvec_L2sqr = fvec_L2sqr_ref_ppc;
-    fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_ref_ppc;
+    // new mappings
+    fvec_L2sqr_ny_nearest = fvec_L2sqr_ny_nearest_ref_ppc;
+    fvec_L2sqr_ny_nearest_y_transposed = fvec_L2sqr_ny_nearest_y_transposed_ref_ppc;
+    fvec_L2sqr_ny_transposed = fvec_L2sqr_ny_transposed_ref_ppc;
+    fvec_inner_product_batch_4 = fvec_inner_product_batch_4_ref_ppc; 	      	    
+    fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_ref_ppc; 
+
+
     fvec_L1 = fvec_L1_ref_ppc;
     fvec_Linf = fvec_Linf_ref_ppc;
 
