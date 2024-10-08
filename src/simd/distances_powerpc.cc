@@ -19,6 +19,7 @@
 
 namespace faiss {
 
+  
 float
 fvec_L2sqr_ref_ppc(const float* x, const float* y, size_t d) {
     size_t i;
@@ -26,7 +27,6 @@ fvec_L2sqr_ref_ppc(const float* x, const float* y, size_t d) {
     float res = 0;
     /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
        Original code:
-
        for (i = 0; i < d; i++) {
            const float tmp = x[i] - y[i];
            res += tmp * tmp;
@@ -39,19 +39,18 @@ fvec_L2sqr_ref_ppc(const float* x, const float* y, size_t d) {
        in scalar mode.  */
     size_t base;
 
-    vector float vx, vy;
+    vector float *vx, *vy;
     vector float vtmp = {0, 0, 0, 0};
     vector float vres = {0, 0, 0, 0};
 
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
     for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
-        /* Load up the data vectors */
-        vx = vec_xl (i*sizeof(float), x);
-        vy = vec_xl (i*sizeof(float), y);
+        vx = (vector float *)(&x[i]);
+        vy = (vector float *)(&y[i]);
 
-        vtmp = vec_sub(vx, vy);
-        vres = vec_madd(vtmp, vtmp, vres);
+        vtmp = vx[0] - vy[0];
+        vres += vtmp * vtmp;
     }
 
     /* Handle any remaining data elements */
@@ -62,6 +61,7 @@ fvec_L2sqr_ref_ppc(const float* x, const float* y, size_t d) {
 
     return res + vres[0] + vres[1] + vres[2] + vres[3];
 }
+
 
 float
 fvec_L1_ref_ppc(const float* x, const float* y, size_t d) {
@@ -474,7 +474,6 @@ fvec_L2sqr_batch_4_ref_ppc(const float* x, const float* y0, const float* y1,
 
     /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
       Original code:
-
       float d0 = 0;
       float d1 = 0;
       float d2 = 0;
@@ -489,7 +488,6 @@ fvec_L2sqr_batch_4_ref_ppc(const float* x, const float* y0, const float* y1,
           d2 += q2 * q2;
           d3 += q3 * q3;
       }
-
       dis0 = d0;
       dis1 = d1;
       dis2 = d2;
@@ -500,7 +498,7 @@ fvec_L2sqr_batch_4_ref_ppc(const float* x, const float* y0, const float* y1,
        in scalar mode.  */
     size_t base, remainder;
 
-    vector float vx, vy0, vy1, vy2, vy3;
+    vector float *vx, *vy0, *vy1, *vy2, *vy3;
     vector float vd0 = {0, 0, 0, 0};
     vector float vd1 = {0, 0, 0, 0};
     vector float vd2 = {0, 0, 0, 0};
@@ -516,23 +514,23 @@ fvec_L2sqr_batch_4_ref_ppc(const float* x, const float* y0, const float* y1,
 
     for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
         /* Load up the data vectors */
-        vx = vec_xl (i*sizeof(float), x);
-        vy0 = vec_xl (i*sizeof(float), y0);
-        vy1 = vec_xl (i*sizeof(float), y1);
-        vy2 = vec_xl (i*sizeof(float), y2);
-        vy3 = vec_xl (i*sizeof(float), y3);
+        vx = (vector float *)(&x[i]);
+        vy0 = (vector float *)(&y0[i]);
+        vy1 = (vector float *)(&y1[i]);
+        vy2 = (vector float *)(&y2[i]);
+        vy3 = (vector float *)(&y3[i]);
 
         /* Replace scalar subtract with vector subtract built-in.  */
-        vq0 = vec_sub(vx, vy0);
-	vq1 = vec_sub(vx, vy1);
-	vq2 = vec_sub(vx, vy2);
-	vq3 = vec_sub(vx, vy3);
+        vq0 = vx[0] - vy0[0];
+        vq1 = vx[0] - vy1[0];
+        vq2 = vx[0] - vy2[0];
+        vq3 = vx[0] - vy3[0];
 
 	/* Replace scalar multiply add with vector multiply add built-in.  */
-	vd0 = vec_madd (vq0, vq0, vd0);
-	vd1 = vec_madd (vq1, vq1, vd1);
-	vd2 = vec_madd (vq2, vq2, vd2);
-	vd3 = vec_madd (vq3, vq3, vd3);
+        vd0 += vq0 * vq0;
+        vd1 += vq1 * vq1;
+        vd2 += vq2 * vq2;
+        vd3 += vq3 * vq3;
     }
 
     /* Handle the remainder of the elments in scalar mode.  */
