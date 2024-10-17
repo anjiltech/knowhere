@@ -1,8 +1,14 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
+/* Copyright (C) 2019-2023 Zilliz. All rights reserved.
  *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain a
+ * copy of the License at:
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
  */
 
 #if defined(__powerpc__)
@@ -19,24 +25,12 @@
 
 namespace faiss {
 
-  
 float
-fvec_L2sqr_ref_ppc(const float* x, const float* y, size_t d) {
-    size_t i;
-
-    float res = 0;
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-       for (i = 0; i < d; i++) {
-           const float tmp = x[i] - y[i];
-           res += tmp * tmp;
-       }
-       return res;
-    */
-
+fvec_L2sqr_ppc(const float* x, const float* y, size_t d) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
+    float res = 0;
     size_t base;
 
     vector float *vx, *vy;
@@ -45,7 +39,7 @@ fvec_L2sqr_ref_ppc(const float* x, const float* y, size_t d) {
 
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         vx = (vector float *)(&x[i]);
         vy = (vector float *)(&y[i]);
 
@@ -64,22 +58,11 @@ fvec_L2sqr_ref_ppc(const float* x, const float* y, size_t d) {
 
 
 float
-fvec_L1_ref_ppc(const float* x, const float* y, size_t d) {
-    size_t i;
-    float res = 0;
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-
-       for (i = 0; i < d; i++) {
-           const float tmp = x[i] - y[i];
-           res += std::fabs(tmp);
-       }
-       return res;
-    */
-
+fvec_L1_ppc(const float* x, const float* y, size_t d) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
+    float res = 0;
     size_t base;
 
     vector float vx, vy;
@@ -88,7 +71,7 @@ fvec_L1_ref_ppc(const float* x, const float* y, size_t d) {
 
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         vx = vec_xl (i*sizeof(float), x);
         vy = vec_xl (i*sizeof(float), y);
 
@@ -107,20 +90,11 @@ fvec_L1_ref_ppc(const float* x, const float* y, size_t d) {
 }
 
 float
-fvec_Linf_ref_ppc(const float* x, const float* y, size_t d) {
-    size_t i;
-    float res = 0;
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-
-       for (i = 0; i < d; i++) {
-         res = std::fmax(res, std::fabs(x[i] - y[i]));
-       }
-       return res;
-    */
+fvec_Linf_ppc(const float* x, const float* y, size_t d) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
+    float res = 0;
     size_t base;
 
     vector float vx, vy;
@@ -129,7 +103,7 @@ fvec_Linf_ref_ppc(const float* x, const float* y, size_t d) {
 
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         vx = vec_xl (i*sizeof(float), x);
         vy = vec_xl (i*sizeof(float), y);
 
@@ -150,20 +124,11 @@ fvec_Linf_ref_ppc(const float* x, const float* y, size_t d) {
 }
 
 float
-fvec_inner_product_ref_ppc(const float* x, const float* y, size_t d) {
-    size_t i;
-    float res = 0;
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-
-       for (i = 0; i < d; i++) {
-           res += x[i] * y[i];
-       }
-       return res;
-    */
+fvec_inner_product_ppc(const float* x, const float* y, size_t d) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
+    float res = 0;
     size_t base;
 
     vector float vx, vy;
@@ -171,7 +136,7 @@ fvec_inner_product_ref_ppc(const float* x, const float* y, size_t d) {
 
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         vx = vec_xl (i*sizeof(float), x);
         vy = vec_xl (i*sizeof(float), y);
 
@@ -186,23 +151,12 @@ fvec_inner_product_ref_ppc(const float* x, const float* y, size_t d) {
 }
 
 float
-fvec_norm_L2sqr_ref_ppc(const float* x, size_t d) {
-    size_t i;
-    double res = 0;
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Note, the original code calculated res as a double precision value,
-       than returned the result as a float.
-       Original code:
-
-       for (i = 0; i < d; i++) {
-           res += x[i] * x[i];
-       }
-       return res;
-    */
+fvec_norm_L2sqr_ppc(const float* x, size_t d) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  Do the
        operation as double, then return result as a float.  If the input array
        size is not a power of FLOAT_VEC_SIZE, do the remaining elements in
        scalar mode.  */
+    double res = 0;
     size_t base;
 
     vector float vx;
@@ -212,7 +166,7 @@ fvec_norm_L2sqr_ref_ppc(const float* x, size_t d) {
 
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         vx = vec_xl (i*sizeof(float), x);
 
         /* Convert even/odd floats to double then square elements. */
@@ -232,19 +186,19 @@ fvec_norm_L2sqr_ref_ppc(const float* x, size_t d) {
 }
 
 void
-fvec_L2sqr_ny_ref_ppc(float* dis, const float* x, const float* y, size_t d,
+fvec_L2sqr_ny_ppc(float* dis, const float* x, const float* y, size_t d,
                       size_t ny) {
     for (size_t i = 0; i < ny; i++) {
-        dis[i] = fvec_L2sqr_ref_ppc(x, y, d);
+        dis[i] = fvec_L2sqr_ppc (x, y, d);
         y += d;
     }
 }
 
 void
-fvec_inner_products_ny_ref_ppc(float* ip, const float* x, const float* y,
+fvec_inner_products_ny_ppc(float* ip, const float* x, const float* y,
                                size_t d, size_t ny) {
     for (size_t i = 0; i < ny; i++) {
-        ip[i] = fvec_inner_product_ref_ppc(x, y, d);
+        ip[i] = fvec_inner_product_ppc (x, y, d);
         y += d;
     }
 }
@@ -252,28 +206,11 @@ fvec_inner_products_ny_ref_ppc(float* ip, const float* x, const float* y,
 /// compute ny square L2 distance between x and a set of transposed contiguous
 /// y vectors. squared lengths of y should be provided as well
 void
-fvec_L2sqr_ny_transposed_ref_ppc(float* __restrict dis,
-                                 const float* __restrict x,
-                                 const float* __restrict y,
-                                 const float* __restrict y_sqlen,
-                                 size_t d, size_t d_offset, size_t ny) {
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-
-       float x_sqlen = 0;
-       for (size_t j = 0; j < d; j++) {
-           x_sqlen += x[j] * x[j];
-       }
-
-       for (size_t i = 0; i < ny; i++) {
-           float dp = 0;
-           for (size_t j = 0; j < d; j++) {
-               dp += x[j] * y[i + j * d_offset];
-           }
-
-           dis[i] = x_sqlen + y_sqlen[i] - 2 * dp;
-       }
-    */
+fvec_L2sqr_ny_transposed_ppc(float* __restrict dis,
+			     const float* __restrict x,
+			     const float* __restrict y,
+			     const float* __restrict y_sqlen,
+			     size_t d, size_t d_offset, size_t ny) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
@@ -287,9 +224,9 @@ fvec_L2sqr_ny_transposed_ref_ppc(float* __restrict dis,
 
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         vx = vec_xl (i*sizeof(float), x);
-        vx_sqlen = vec_madd(vx, vx, vx_sqlen);
+        vx_sqlen = vec_madd (vx, vx, vx_sqlen);
     }
 
     x_sqlen = vx_sqlen[0] + vx_sqlen[1] + vx_sqlen[2] + vx_sqlen[3];
@@ -305,7 +242,7 @@ fvec_L2sqr_ny_transposed_ref_ppc(float* __restrict dis,
 
         /* Unrolling gives better performance then trying to vectorize.  */
         base = (d / 16) * 16;
-        for (size_t j = 0; j < base; j = j + 16) {
+        for (size_t j = 0; j < base; j += 16) {
             dp += x[j] * y[i + j * d_offset];
             dp += x[j + 1] * y[i + (j + 1) * d_offset];
             dp += x[j + 2] * y[i + (j + 2) * d_offset];
@@ -336,11 +273,11 @@ fvec_L2sqr_ny_transposed_ref_ppc(float* __restrict dis,
 /// and return the index of the nearest vector.
 /// return 0 if ny == 0.
 size_t
-fvec_L2sqr_ny_nearest_ref_ppc(float* __restrict distances_tmp_buffer,
+fvec_L2sqr_ny_nearest_ppc(float* __restrict distances_tmp_buffer,
                               const float* __restrict x,
                               const float* __restrict y, size_t d, size_t ny) {
 
-    fvec_L2sqr_ny_ref_ppc(distances_tmp_buffer, x, y, d, ny);
+    fvec_L2sqr_ny_ppc(distances_tmp_buffer, x, y, d, ny);
 
     size_t nearest_idx = 0;
     float min_dis = HUGE_VALF;
@@ -359,14 +296,14 @@ fvec_L2sqr_ny_nearest_ref_ppc(float* __restrict distances_tmp_buffer,
 /// squared lengths of y should be provided as well
 /// return 0 if ny == 0.
 size_t
-fvec_L2sqr_ny_nearest_y_transposed_ref_ppc(float* __restrict distances_tmp_buffer,
-                                           const float* __restrict x,
-                                           const float* __restrict y,
-                                           const float* __restrict y_sqlen,
-                                           size_t d, size_t d_offset,
-					   size_t ny) {
-    fvec_L2sqr_ny_transposed_ref_ppc(distances_tmp_buffer, x, y, y_sqlen, d,
-                                     d_offset, ny);
+fvec_L2sqr_ny_nearest_y_transposedf_ppc(float* __restrict distances_tmp_buffer,
+					const float* __restrict x,
+					const float* __restrict y,
+					const float* __restrict y_sqlen,
+					size_t d, size_t d_offset,
+					size_t ny) {
+    fvec_L2sqr_ny_transposed_ppc (distances_tmp_buffer, x, y, y_sqlen, d,
+				  d_offset, ny);
 
     size_t nearest_idx = 0;
     float min_dis = HUGE_VALF;
@@ -382,15 +319,8 @@ fvec_L2sqr_ny_nearest_y_transposed_ref_ppc(float* __restrict distances_tmp_buffe
 }
 
 void
-fvec_madd_ref_ppc(size_t n, const float* a, float bf, const float* b,
-                  float* c) {
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-
-       for (size_t i = 0; i < n; i++) {
-           c[i] = a[i] + bf * b[i];
-       }
-   */
+fvec_madd_ppc(size_t n, const float* a, float bf, const float* b,
+	      float* c) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
@@ -399,7 +329,7 @@ fvec_madd_ref_ppc(size_t n, const float* a, float bf, const float* b,
 
     base = (n / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         va = vec_xl (i*sizeof(float), a);
         vb = vec_xl (i*sizeof(float), b);
 
@@ -414,23 +344,8 @@ fvec_madd_ref_ppc(size_t n, const float* a, float bf, const float* b,
 }
 
 int
-fvec_madd_and_argmin_ref_ppc(size_t n, const float* a, float bf,
+fvec_madd_and_argmin_ppc(size_t n, const float* a, float bf,
                              const float* b, float* c) {
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-
-       float vmin = 1e20;
-       int imin = -1;
-
-       for (size_t i = 0; i < n; i++) {
-           c[i] = a[i] + bf * b[i];
-           if (c[i] < vmin) {
-               vmin = c[i];
-               imin = i;
-            }
-       }
-       return imin;
-    */
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
@@ -442,7 +357,7 @@ fvec_madd_and_argmin_ref_ppc(size_t n, const float* a, float bf,
 
     base = (n / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         va = vec_xl (i*sizeof(float), a);
         vb = vec_xl (i*sizeof(float), b);
 
@@ -468,31 +383,10 @@ fvec_madd_and_argmin_ref_ppc(size_t n, const float* a, float bf,
 }
 
 void
-fvec_L2sqr_batch_4_ref_ppc(const float* x, const float* y0, const float* y1,
-                           const float* y2, const float* y3, const size_t d,
-                           float& dis0, float& dis1, float& dis2, float& dis3) {
+fvec_L2sqr_batch_4_ppc(const float* x, const float* y0, const float* y1,
+		       const float* y2, const float* y3, const size_t d,
+		       float& dis0, float& dis1, float& dis2, float& dis3) {
 
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-      Original code:
-      float d0 = 0;
-      float d1 = 0;
-      float d2 = 0;
-      float d3 = 0;
-      for (size_t i = 0; i < d; ++i) {
-          const float q0 = x[i] - y0[i];
-          const float q1 = x[i] - y1[i];
-          const float q2 = x[i] - y2[i];
-          const float q3 = x[i] - y3[i];
-          d0 += q0 * q0;
-          d1 += q1 * q1;
-          d2 += q2 * q2;
-          d3 += q3 * q3;
-      }
-      dis0 = d0;
-      dis1 = d1;
-      dis2 = d2;
-      dis3 = d3;
-    */
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
@@ -512,7 +406,7 @@ fvec_L2sqr_batch_4_ref_ppc(const float* x, const float* y0, const float* y1,
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
     remainder = d % FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         /* Load up the data vectors */
         vx = (vector float *)(&x[i]);
         vy0 = (vector float *)(&y0[i]);
@@ -555,32 +449,13 @@ fvec_L2sqr_batch_4_ref_ppc(const float* x, const float* y0, const float* y1,
 }
 
 void
-fvec_inner_product_batch_4_ref_ppc(const float* __restrict x,
-                                   const float* __restrict y0,
-                                   const float* __restrict y1,
-                                   const float* __restrict y2,
-                                   const float* __restrict y3,
-                                   const size_t d, float& dis0, float& dis1,
-                                   float& dis2, float& dis3) {
-    /* PowerPC, vectorize the function using PowerPC GCC built-in calls.
-       Original code:
-
-       float d0 = 0;
-       float d1 = 0;
-       float d2 = 0;
-       float d3 = 0;
-       for (size_t i = 0; i < d; ++i) {
-           d0 += x[i] * y0[i];
-           d1 += x[i] * y1[i];
-           d2 += x[i] * y2[i];
-           d3 += x[i] * y3[i];
-       }
-
-       dis0 = d0;
-       dis1 = d1;
-       dis2 = d2;
-       dis3 = d3;
-   */
+fvec_inner_product_batch_4_ppc(const float* __restrict x,
+			       const float* __restrict y0,
+			       const float* __restrict y1,
+			       const float* __restrict y2,
+			       const float* __restrict y3,
+			       const size_t d, float& dis0, float& dis1,
+			       float& dis2, float& dis3) {
     /* Vector implmentaion uses vector size of FLOAT_VEC_SIZE.  If the input
        array size is not a power of FLOAT_VEC_SIZE, do the remaining elements
        in scalar mode.  */
@@ -595,7 +470,7 @@ fvec_inner_product_batch_4_ref_ppc(const float* __restrict x,
     base = (d / FLOAT_VEC_SIZE) * FLOAT_VEC_SIZE;
     remainder = d % FLOAT_VEC_SIZE;
 
-    for (size_t i = 0; i < base; i = i + FLOAT_VEC_SIZE) {
+    for (size_t i = 0; i < base; i += FLOAT_VEC_SIZE) {
         vx = vec_xl (i*sizeof(float), x);
         vy0 = vec_xl (i*sizeof(float), y0);
         vy1 = vec_xl (i*sizeof(float), y1);
@@ -635,26 +510,24 @@ fvec_inner_product_batch_4_ref_ppc(const float* __restrict x,
 }
 
 int32_t
-ivec_inner_product_ref_ppc(const int8_t* x, const int8_t* y, size_t d) {
-    size_t i;
+ivec_inner_product_ppc(const int8_t* x, const int8_t* y, size_t d) {
     int32_t res = 0;
 
     /* Attempts to mannually vectorize and manually unroll the loop
        do not seem to improve the performance. */
-    for (i = 0; i < d; i++) {
+    for (size_t i = 0; i < d; i++) {
         res += (int32_t)x[i] * y[i];
     }
     return res;
 }
 
 int32_t
-ivec_L2sqr_ref_ppc(const int8_t* x, const int8_t* y, size_t d) {
-    size_t i;
+ivec_L2sqr_ppc(const int8_t* x, const int8_t* y, size_t d) {
     int32_t res = 0;
 
     /* Attempts to mannually vectorize and manually unroll the loop
        do not seem to improve the performance. */
-    for (i = 0; i < d; i++) {
+    for (size_t i = 0; i < d; i++) {
         const int32_t tmp = (int32_t)x[i] - (int32_t)y[i];
 	res += tmp * tmp;
     }
