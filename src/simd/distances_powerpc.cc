@@ -48,7 +48,7 @@ fvec_L2sqr_ppc(const float* x, const float* y, size_t d) {
     }
 
     /* Handle any remaining data elements */
-    for (i = base; i < d; i++) {
+    for (size_t i = base; i < d; i++) {
         const float tmp = x[i] - y[i];
         res += tmp * tmp;
     }
@@ -81,7 +81,7 @@ fvec_L1_ppc(const float* x, const float* y, size_t d) {
     }
 
     /* Handle any remaining data elements */
-    for (i = base; i < d; i++) {
+    for (size_t i = base; i < d; i++) {
         const float tmp = x[i] - y[i];
         res += std::fabs(tmp);
     }
@@ -116,7 +116,7 @@ fvec_Linf_ppc(const float* x, const float* y, size_t d) {
     }
 
     /* Handle any remaining data elements */
-    for (i = base; i < d; i++) {
+    for (size_t i = base; i < d; i++) {
         res = std::fmax(res, std::fabs(x[i] - y[i]));
     }
 
@@ -144,7 +144,7 @@ fvec_inner_product_ppc(const float* x, const float* y, size_t d) {
     }
 
     /* Handle any remaining data elements */
-    for (i = base; i < d; i++) {
+    for (size_t i = base; i < d; i++) {
         res += x[i] * y[i];
     }
     return res + vres[0] + vres[1] + vres[2] + vres[3];
@@ -179,7 +179,7 @@ fvec_norm_L2sqr_ppc(const float* x, size_t d) {
     }
 
     /* Handle any remaining data elements */
-    for (i = base; i < d; i++) {
+    for (size_t i = base; i < d; i++) {
         res += x[i] * x[i];
     }
     return res + vreso[0] + vreso[1] + vrese[0] + vrese[1];
