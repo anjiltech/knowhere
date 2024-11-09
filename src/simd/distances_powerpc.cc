@@ -11,7 +11,7 @@
  * language governing permissions and limitations under the License.
  */
 
-#if defined(__powerpc__)
+#if defined(__powerpc64__)
 
 #include <altivec.h>   /* Required for the Power GCC built-ins  */
 
