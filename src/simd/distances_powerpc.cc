@@ -296,7 +296,7 @@ fvec_L2sqr_ny_nearest_ppc(float* __restrict distances_tmp_buffer,
 /// squared lengths of y should be provided as well
 /// return 0 if ny == 0.
 size_t
-fvec_L2sqr_ny_nearest_y_transposedf_ppc(float* __restrict distances_tmp_buffer,
+fvec_L2sqr_ny_nearest_y_transposed_ppc(float* __restrict distances_tmp_buffer,
 					const float* __restrict x,
 					const float* __restrict y,
 					const float* __restrict y_sqlen,
