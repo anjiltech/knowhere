@@ -331,7 +331,7 @@ fvec_hook(std::string& simd_type) {
     fvec_L2sqr = fvec_L2sqr_ppc;
     // new mappings
     fvec_L2sqr_ny_nearest = fvec_L2sqr_ny_nearest_ppc;
-    // fvec_L2sqr_ny_nearest_y_transposed = fvec_L2sqr_ny_nearest_y_transposed_ppc;
+    fvec_L2sqr_ny_nearest_y_transposed = fvec_L2sqr_ny_nearest_y_transposed_ppc;
     fvec_L2sqr_ny_transposed = fvec_L2sqr_ny_transposed_ppc;
     fvec_inner_product_batch_4 = fvec_inner_product_batch_4_ppc;
     fvec_L2sqr_batch_4 = fvec_L2sqr_batch_4_ppc;
